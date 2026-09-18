@@ -411,8 +411,15 @@ void EXTI4_IRQHandler(void)
             last_btn_start = msTicks;
 
             if (current_state == STATE_READY) {
+                // 1. เคลียร์ Pending Interrupt ของปุ่ม PA10 ที่ค้างอยู่ก่อนหน้า
+                EXTI->PR |= EXTI_PR_PR10;
+
+                // 2. ตั้งเป็น 1 เพื่อบังคับให้ระบบต้องเห็นแสงสว่างก่อน (LDR > LDR_LIGHT_THRESHOLD)
+                // ถึงจะเริ่มรับพัสดุชิ้นแรก ตัดปัญหาพัสดุแรกเด้งเอง 100%
+                is_covered = 1;
+
                 current_state = STATE_RUNNING;
-                last_printed_sec = 0xFFFFFFFF; // รีเซ็ตการนับถอยหลัง
+                last_printed_sec = 0xFFFFFFFF; // รีเซ็ตตัวนับเวลาบน Serial
                 UART2_TxString("\r\n[TEST STARTED]\r\n");
             }
         }
